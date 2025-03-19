@@ -4,7 +4,7 @@ import './EntityRelationshipDiagram.css';
 const EntityRelationshipDiagram = ({ tables, relations }) => {
   const canvasRef = useRef(null);
   
-  // Function to draw the ER diagram
+  // Function to draw the ER diagram in Chen notation
   const drawERDiagram = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -16,28 +16,38 @@ const EntityRelationshipDiagram = ({ tables, relations }) => {
     // Clear canvas
     ctx.clearRect(0, 0, width, height);
     
-    // Set some styling constants
+    // Set styling constants
     const entityWidth = 120;
-    const entityHeight = 80;
-    const spacing = 180;
+    const entityHeight = 60;
+    const attributeRadius = 35;
+    const relationshipWidth = 100;
+    const relationshipHeight = 60;
+    const spacing = 300; // Increased spacing for better visualization
     const rows = Math.ceil(Math.sqrt(tables.length));
     const cols = Math.ceil(tables.length / rows);
     
     // Map to store entity positions
     const entityPositions = {};
+    const relationshipPositions = {};
     
     // Draw entities (rectangles)
     tables.forEach((table, idx) => {
       const row = Math.floor(idx / cols);
       const col = idx % cols;
       
-      const x = 100 + col * spacing;
-      const y = 100 + row * spacing;
+      const x = 150 + col * spacing;
+      const y = 150 + row * spacing;
       
-      // Store entity position for relationship lines
-      entityPositions[table.id] = { x, y, width: entityWidth, height: entityHeight };
+      // Store entity position
+      entityPositions[table.id] = { 
+        x: x + entityWidth / 2, 
+        y: y + entityHeight / 2,
+        width: entityWidth, 
+        height: entityHeight,
+        fields: table.fields
+      };
       
-      // Draw rectangle entity
+      // Draw rectangle entity (table)
       ctx.fillStyle = '#f5f5f5';
       ctx.strokeStyle = '#333';
       ctx.lineWidth = 2;
@@ -54,110 +64,138 @@ const EntityRelationshipDiagram = ({ tables, relations }) => {
       ctx.textBaseline = 'middle';
       ctx.fillText(table.name, x + entityWidth / 2, y + entityHeight / 2);
       
-      // Draw primary key indicator (small circle at top)
-      const primaryKeys = table.fields.filter(field => field.isPrimaryKey);
-      if (primaryKeys.length > 0) {
-        ctx.fillStyle = '#e74c3c';
+      // Draw attributes (ovals)
+      const attributeCount = table.fields.length;
+      const attributeAngleStep = (Math.PI * 2) / Math.max(attributeCount, 1);
+      const attributeDistanceFromEntity = 80;
+      
+      table.fields.forEach((field, fieldIdx) => {
+        // Calculate attribute position in a circular pattern around the entity
+        const angle = attributeAngleStep * fieldIdx - Math.PI / 2;
+        const attrX = x + entityWidth / 2 + Math.cos(angle) * attributeDistanceFromEntity;
+        const attrY = y + entityHeight / 2 + Math.sin(angle) * attributeDistanceFromEntity;
+        
+        // Draw oval for attribute
         ctx.beginPath();
-        ctx.arc(x + entityWidth / 2, y - 10, 6, 0, Math.PI * 2);
-        ctx.fill();
-      }
+        ctx.save();
+        ctx.translate(attrX, attrY);
+        ctx.scale(1, 0.7); // Make it oval-shaped
+        
+        // Primary key attributes have a different style
+        if (field.isPrimaryKey) {
+          ctx.fillStyle = '#fffacd'; // Light yellow
+          ctx.strokeStyle = '#333';
+          ctx.lineWidth = 2;
+          // Draw underline for primary key
+          ctx.beginPath();
+          ctx.arc(0, 0, attributeRadius / 1.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        } else {
+          ctx.fillStyle = '#e6f7ff'; // Light blue
+          ctx.strokeStyle = '#333';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(0, 0, attributeRadius / 1.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        }
+        ctx.restore();
+        
+        // Draw attribute name
+        ctx.fillStyle = '#000';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(field.name, attrX, attrY);
+        
+        // Store attribute position for relationships
+        if (!entityPositions[table.id].attributePositions) {
+          entityPositions[table.id].attributePositions = {};
+        }
+        entityPositions[table.id].attributePositions[field.id] = {
+          x: attrX,
+          y: attrY
+        };
+      });
     });
     
-    // Draw relationships
-    relations.forEach(relation => {
+    // Draw relationships (diamonds)
+    relations.forEach((relation, idx) => {
       const sourceEntity = entityPositions[relation.sourceTableId];
       const targetEntity = entityPositions[relation.targetTableId];
       
       if (!sourceEntity || !targetEntity) return;
       
-      // Calculate connection points
-      const source = {
-        x: sourceEntity.x + sourceEntity.width / 2,
-        y: sourceEntity.y + sourceEntity.height / 2
+      // Calculate relationship position (midpoint between entities)
+      const relX = (sourceEntity.x + targetEntity.x) / 2;
+      const relY = (sourceEntity.y + targetEntity.y) / 2;
+      
+      // Store relationship position
+      relationshipPositions[relation.id] = {
+        x: relX,
+        y: relY,
+        width: relationshipWidth,
+        height: relationshipHeight
       };
       
-      const target = {
-        x: targetEntity.x + targetEntity.width / 2,
-        y: targetEntity.y + targetEntity.height / 2
-      };
+      // Draw diamond for relationship
+      ctx.fillStyle = '#f0f8ff'; // Light blue
+      ctx.strokeStyle = '#3498db';
+      ctx.lineWidth = 2;
       
-      // Find direction vector
-      const dx = target.x - source.x;
-      const dy = target.y - source.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      
-      // Normalize
-      const nx = dx / dist;
-      const ny = dy / dist;
-      
-      // Adjust start and end points to be on entity borders
-      const sourceX = source.x + nx * (sourceEntity.width / 2);
-      const sourceY = source.y + ny * (sourceEntity.height / 2);
-      const targetX = target.x - nx * (targetEntity.width / 2);
-      const targetY = target.y - ny * (targetEntity.height / 2);
-      
-      // Draw relationship line
-      ctx.strokeStyle = '#666';
-      ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.moveTo(sourceX, sourceY);
-      ctx.lineTo(targetX, targetY);
-      ctx.stroke();
-      
-      // Draw relationship type indicator (diamond) in the middle
-      const midX = (sourceX + targetX) / 2;
-      const midY = (sourceY + targetY) / 2;
-      
-      // Draw diamond
-      ctx.fillStyle = '#3498db';
-      ctx.beginPath();
-      ctx.moveTo(midX, midY - 10); // Top
-      ctx.lineTo(midX + 10, midY); // Right
-      ctx.lineTo(midX, midY + 10); // Bottom
-      ctx.lineTo(midX - 10, midY); // Left
+      ctx.moveTo(relX, relY - relationshipHeight / 2); // Top point
+      ctx.lineTo(relX + relationshipWidth / 2, relY); // Right point
+      ctx.lineTo(relX, relY + relationshipHeight / 2); // Bottom point
+      ctx.lineTo(relX - relationshipWidth / 2, relY); // Left point
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
       
-      // Draw "crow's foot" notation at the "many" end (target)
-      const footLen = 10;
-      const footWidth = 6;
+      // Draw relationship name
+      ctx.fillStyle = '#000';
+      ctx.font = '12px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(relation.name || 'has', relX, relY);
       
-      // Calculate angle for the crow's foot
-      const angle = Math.atan2(targetY - sourceY, targetX - sourceX);
+      // Draw lines connecting entities to relationship
+      ctx.strokeStyle = '#666';
+      ctx.lineWidth = 1.5;
       
-      // Draw the three lines of the crow's foot
+      // Line from source entity to relationship
       ctx.beginPath();
-      ctx.moveTo(targetX, targetY);
-      ctx.lineTo(
-        targetX - footLen * Math.cos(angle) + footWidth * Math.sin(angle),
-        targetY - footLen * Math.sin(angle) - footWidth * Math.cos(angle)
-      );
-      ctx.moveTo(targetX, targetY);
-      ctx.lineTo(
-        targetX - footLen * Math.cos(angle),
-        targetY - footLen * Math.sin(angle)
-      );
-      ctx.moveTo(targetX, targetY);
-      ctx.lineTo(
-        targetX - footLen * Math.cos(angle) - footWidth * Math.sin(angle),
-        targetY - footLen * Math.sin(angle) + footWidth * Math.cos(angle)
-      );
+      ctx.moveTo(sourceEntity.x, sourceEntity.y);
+      ctx.lineTo(relX, relY);
       ctx.stroke();
       
-      // Draw a vertical line at the "one" end (source)
-      const barLen = 8;
+      // Line from relationship to target entity
       ctx.beginPath();
-      ctx.moveTo(
-        sourceX - barLen * Math.sin(angle),
-        sourceY + barLen * Math.cos(angle)
-      );
-      ctx.lineTo(
-        sourceX + barLen * Math.sin(angle),
-        sourceY - barLen * Math.cos(angle)
-      );
+      ctx.moveTo(relX, relY);
+      ctx.lineTo(targetEntity.x, targetEntity.y);
       ctx.stroke();
+      
+      // Draw cardinality (1:N relationship)
+      // Source side (1)
+      const sourceAngle = Math.atan2(relY - sourceEntity.y, relX - sourceEntity.x);
+      const sourceDistance = 25;
+      const sourceCardX = sourceEntity.x + Math.cos(sourceAngle) * sourceDistance;
+      const sourceCardY = sourceEntity.y + Math.sin(sourceAngle) * sourceDistance;
+      
+      ctx.fillStyle = '#000';
+      ctx.font = 'bold 14px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('1', sourceCardX, sourceCardY);
+      
+      // Target side (N)
+      const targetAngle = Math.atan2(targetEntity.y - relY, targetEntity.x - relX);
+      const targetDistance = 25;
+      const targetCardX = targetEntity.x - Math.cos(targetAngle) * targetDistance;
+      const targetCardY = targetEntity.y - Math.sin(targetAngle) * targetDistance;
+      
+      ctx.fillText('N', targetCardX, targetCardY);
     });
   };
   
@@ -168,7 +206,7 @@ const EntityRelationshipDiagram = ({ tables, relations }) => {
       const parent = canvasRef.current.parentElement;
       if (parent) {
         canvasRef.current.width = parent.clientWidth;
-        canvasRef.current.height = parent.clientHeight;
+        canvasRef.current.height = Math.max(800, parent.clientHeight);
         drawERDiagram();
       }
     };
@@ -194,23 +232,27 @@ const EntityRelationshipDiagram = ({ tables, relations }) => {
       <div className="er-diagram-legend">
         <div className="legend-item">
           <div className="legend-symbol entity-rectangle"></div>
-          <span>Entity (Table)</span>
+          <span>Entity</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-symbol attribute-oval"></div>
+          <span>Attribute</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-symbol key-attribute-oval"></div>
+          <span>Key Attribute</span>
         </div>
         <div className="legend-item">
           <div className="legend-symbol relationship-diamond"></div>
           <span>Relationship</span>
         </div>
         <div className="legend-item">
-          <div className="legend-symbol primary-key-circle"></div>
-          <span>Primary Key</span>
-        </div>
-        <div className="legend-item">
-          <div className="legend-symbol crows-foot"></div>
-          <span>Many (N)</span>
-        </div>
-        <div className="legend-item">
-          <div className="legend-symbol one-bar"></div>
+          <div className="legend-symbol cardinality-one"></div>
           <span>One (1)</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-symbol cardinality-many"></div>
+          <span>Many (N)</span>
         </div>
       </div>
     </div>

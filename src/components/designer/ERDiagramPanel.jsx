@@ -5,70 +5,88 @@ const ERDiagramPanel = ({ tables, relations, onTogglePanel }) => {
   // Skip rendering if no tables
   if (!tables.length) return null;
 
+  // Function to get relation name
+  const getRelationName = (relationId) => {
+    const relation = relations.find(rel => rel.id === relationId);
+    return relation?.name || 'has';
+  };
+
   return (
     <div className="er-diagram-panel">
       <div className="er-panel-header">
-        <h3>Entity Relationship Diagram</h3>
+        <h3>Entity Relationship Model</h3>
         <button className="close-panel-btn" onClick={onTogglePanel}>×</button>
       </div>
       
       <div className="er-diagram-container">
-        {tables.map(table => (
-          <div key={table.id} className="er-table-card">
-            <div className="er-table-header">
-              <strong>{table.name}</strong>
-            </div>
-            <div className="er-table-fields">
-              {table.fields.map(field => {
-                // Find relationships where this field is involved
-                const relationsForField = relations.filter(rel => 
-                  (rel.sourceTableId === table.id && rel.sourceFieldId === field.id) || 
-                  (rel.targetTableId === table.id && rel.targetFieldId === field.id)
-                );
-                
-                return (
+        <div className="er-panel-section">
+          <h4 className="er-panel-section-title">Entities</h4>
+          {tables.map(table => (
+            <div key={table.id} className="er-table-card">
+              <div className="er-table-header">
+                <strong>{table.name}</strong>
+              </div>
+              <div className="er-table-attrs">
+                <h5 className="er-attr-section-title">Attributes</h5>
+                {table.fields.map(field => (
                   <div 
                     key={field.id} 
-                    className={`er-table-field ${field.isPrimaryKey ? 'primary-key' : ''} 
-                               ${relationsForField.length ? 'has-relation' : ''}`}
+                    className={`er-table-attr ${field.isPrimaryKey ? 'primary-key' : ''}`}
                   >
-                    <div className="field-name-type">
+                    <div className="attr-name-type">
                       {field.isPrimaryKey && <span className="er-key-icon">🔑</span>}
-                      <span className="er-field-name">{field.name}</span>
-                      <span className="er-field-type">{field.type}</span>
+                      <span className="er-attr-name">{field.name}</span>
+                      <span className="er-attr-type">{field.type}</span>
                     </div>
-                    
-                    {relationsForField.length > 0 && (
-                      <div className="field-relations">
-                        {relationsForField.map(relation => {
-                          // Determine if this field is source or target
-                          const isSource = relation.sourceTableId === table.id && relation.sourceFieldId === field.id;
-                          
-                          // Find the related table and field
-                          const relatedTableId = isSource ? relation.targetTableId : relation.sourceTableId;
-                          const relatedFieldId = isSource ? relation.targetFieldId : relation.sourceFieldId;
-                          
-                          const relatedTable = tables.find(t => t.id === relatedTableId);
-                          const relatedField = relatedTable?.fields.find(f => f.id === relatedFieldId);
-                          
-                          if (!relatedTable || !relatedField) return null;
-                          
-                          return (
-                            <div key={relation.id} className="relation-info">
-                              <span className="relation-arrow">{isSource ? '→' : '←'}</span>
-                              <span className="related-table">{relatedTable.name}</span>
-                              <span className="related-field">({relatedField.name})</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
                   </div>
-                );
-              })}
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+        
+        <div className="er-panel-section">
+          <h4 className="er-panel-section-title">Relationships</h4>
+          {relations.map(relation => {
+            const sourceTable = tables.find(t => t.id === relation.sourceTableId);
+            const targetTable = tables.find(t => t.id === relation.targetTableId);
+            const sourceField = sourceTable?.fields.find(f => f.id === relation.sourceFieldId);
+            const targetField = targetTable?.fields.find(f => f.id === relation.targetFieldId);
+            
+            if (!sourceTable || !targetTable || !sourceField || !targetField) return null;
+            
+            return (
+              <div key={relation.id} className="er-relation-card">
+                <div className="er-relation-header">
+                  <strong>{relation.name || 'has'}</strong>
+                </div>
+                <div className="er-relation-details">
+                  <div className="er-relation-entity">
+                    <span className="er-entity-name">{sourceTable.name}</span>
+                    <span className="er-cardinality">1</span>
+                  </div>
+                  <div className="er-relation-connector">
+                    <span className="er-connector-line">—</span>
+                  </div>
+                  <div className="er-relation-entity">
+                    <span className="er-cardinality">N</span>
+                    <span className="er-entity-name">{targetTable.name}</span>
+                  </div>
+                </div>
+                <div className="er-relation-attributes">
+                  <div className="er-relation-attr">
+                    <span className="er-attr-label">Source:</span>
+                    <span className="er-attr-value">{sourceField.name}</span>
+                  </div>
+                  <div className="er-relation-attr">
+                    <span className="er-attr-label">Target:</span>
+                    <span className="er-attr-value">{targetField.name}</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

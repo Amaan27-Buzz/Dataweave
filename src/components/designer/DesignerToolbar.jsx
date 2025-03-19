@@ -5,11 +5,9 @@ const DesignerToolbar = ({
   onToggleRelation,
   onExportSQL,
   onCreateExample,
-  onToggleERDiagram,
-  onToggleCanvas,
+  onToggleView,
   isCreatingRelation,
-  showERDiagram,
-  showCanvas
+  showERDiagram
 }) => {
   return (
     <div className="tools-panel">
@@ -36,15 +34,11 @@ const DesignerToolbar = ({
         </li>
       </ul>
 
-      <h3>Views</h3>
+      <h3>View</h3>
       <ul>
-        <li onClick={onToggleCanvas}>
-          <span className="tool-icon">🖌️</span> Canvas
-          {showCanvas && <span className="active-tool"> (Visible)</span>}
-        </li>
-        <li onClick={onToggleERDiagram}>
-          <span className="tool-icon">📊</span> ER Diagram
-          {showERDiagram && <span className="active-tool"> (Visible)</span>}
+        <li onClick={onToggleView} className="toggle-view">
+          <span className="tool-icon">{showERDiagram ? '🖌️' : '📊'}</span>
+          {showERDiagram ? 'Switch to Canvas' : 'Switch to ER Diagram'}
         </li>
       </ul>
     </div>

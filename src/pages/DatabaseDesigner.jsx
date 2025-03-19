@@ -8,6 +8,8 @@ import { RelationsCanvas } from '../components/designer/RelationUtils';
 import EntityRelationshipDiagram from '../components/designer/EntityRelationshipDiagram';
 import { generateSQL } from '../components/designer/SQLUtils';
 import { DATA_TYPES } from '../components/designer/constants';
+import EditTableModal from '../components/designer/EditTableModal';
+import ViewDataModal from '../components/designer/ViewDataModal';
 
 const DatabaseDesigner = () => {
   // State for tables and relationships
@@ -17,27 +19,20 @@ const DatabaseDesigner = () => {
   const [dragInfo, setDragInfo] = useState(null);
   const [creatingRelation, setCreatingRelation] = useState(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [viewModalVisible, setViewModalVisible] = useState(false);
+  const [modalTableId, setModalTableId] = useState(null);
+  const [tableData, setTableData] = useState({});
   
-  /// View states
-  const [showCanvas, setShowCanvas] = useState(true);
+  // View state (only one is true at a time)
   const [showERDiagram, setShowERDiagram] = useState(false);
   
   // References
   const canvasRef = useRef(null);
 
-  // Toggle ER Diagram
-  const toggleERDiagram = () => {
+  // Toggle between Canvas and ER Diagram
+  const toggleView = () => {
     setShowERDiagram(!showERDiagram);
-  };
-  
-  // Toggle Canvas
-  const toggleCanvas = () => {
-    setShowCanvas(!showCanvas);
-    
-    // If toggling off canvas and ER diagram is not shown, show it
-    if (showCanvas && !showERDiagram) {
-      setShowERDiagram(true);
-    }
   };
   
   // Create a new table
@@ -355,7 +350,7 @@ const DatabaseDesigner = () => {
       ]
     };
     
-        // Add tables to state
+    // Add tables to state
     setTables([usersTable, postsTable, commentsTable]);
     
     // Create relationships between tables (after a short delay to ensure tables are rendered)
@@ -394,147 +389,167 @@ const DatabaseDesigner = () => {
     }, 100);
   };
 
+  const openEditModal = (tableId) => {
+    setModalTableId(tableId);
+    setEditModalVisible(true);
+  };
   
+  const openViewModal = (tableId) => {
+    setModalTableId(tableId);
+    setViewModalVisible(true);
+  };
+  
+  const saveTableChanges = (updatedTable) => {
+    setTables(tables.map(table => 
+      table.id === updatedTable.id ? updatedTable : table
+    ));
+  };
+  
+  const saveTableData = (tableId, data) => {
+    setTableData({
+      ...tableData,
+      [tableId]: data
+    });
+  };
 
   const renderMainContent = () => {
-    // No view selected
-    if (!showCanvas && !showERDiagram) {
-      return (
-        <div className="no-view-message">
-          <h2>No View Selected</h2>
-          <p>Please select at least one view to display:</p>
-          <div className="view-buttons">
-            <button onClick={() => setShowCanvas(true)}>Show Canvas</button>
-            <button onClick={() => setShowERDiagram(true)}>Show ER Diagram</button>
+      if (tables.length === 0) {
+        return (
+          <div className="main-content full-width">
+            <div className="canvas-placeholder">
+              <p>Your database design workspace</p>
+              <p>Click "Add Table" in the Tools panel to start</p>
+              <p>Or try the "Create Example" to see a sample schema</p>
+            </div>
           </div>
-        </div>
-      );
-    }
+        );
+      }
     
-    return (
-      <div className="main-content">
-        {/* Canvas View */}
-        {showCanvas && (
-          <div 
-            ref={canvasRef} 
-            className="canvas schema-canvas"
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-          >
-            {tables.length === 0 ? (
-              <div className="canvas-placeholder">
-                <p>Your database design canvas</p>
-                <p>Click "Add Table" in the Tools panel to start</p>
-                <p>Or try the "Create Example" to see a sample schema</p>
-              </div>
-            ) : (
-              <>
-                <RelationsCanvas 
-                  relations={relations} 
-                  tables={tables} 
+      return (
+        <div className="main-content full-width">
+          {!showERDiagram ? (
+            // Canvas View
+            <div 
+              ref={canvasRef} 
+              className="canvas schema-canvas full-width"
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+            >
+              <RelationsCanvas 
+                relations={relations} 
+                tables={tables} 
+                creatingRelation={creatingRelation}
+                mousePosition={mousePosition}
+              />
+                    
+              {tables.map(table => (
+                <Table 
+                  key={table.id}
+                  table={table}
+                  isSelected={selectedTable === table.id}
+                  dataTypes={DATA_TYPES}
                   creatingRelation={creatingRelation}
-                  mousePosition={mousePosition}
+                  onSelect={() => setSelectedTable(table.id)}
+                  onStartDrag={(e, offsetX, offsetY) => {
+                    if (creatingRelation) return;
+                    setDragInfo({
+                      tableId: table.id,
+                      offsetX,
+                      offsetY
+                    });
+                    setSelectedTable(table.id);
+                    e.preventDefault();
+                  }}
+                  onDeleteTable={() => deleteTable(table.id)}
+                  onUpdateField={(fieldId, updates) => {
+                    setTables(tables.map(t => {
+                      if (t.id === table.id) {
+                        return {
+                          ...t,
+                          fields: t.fields.map(f => {
+                            if (f.id === fieldId) {
+                              return { ...f, ...updates };
+                            }
+                            return f;
+                          })
+                        };
+                      }
+                      return t;
+                    }));
+                  }}
+                  onDeleteField={(fieldId) => deleteField(table.id, fieldId)}
+                  onAddField={() => addField(table.id)}
+                  onStartRelation={(fieldId) => startRelation(table.id, fieldId)}
+                  onCompleteRelation={(fieldId) => completeRelation(table.id, fieldId)}
+                  onViewData={() => openViewModal(table.id)}
+                  onEditTable={() => openEditModal(table.id)}
                 />
-                
-                {tables.map(table => (
-                  <Table 
-                    key={table.id}
-                    table={table}
-                    isSelected={selectedTable === table.id}
-                    dataTypes={DATA_TYPES}
-                    creatingRelation={creatingRelation}
-                    onSelect={() => setSelectedTable(table.id)}
-                    onStartDrag={(e, offsetX, offsetY) => {
-                      if (creatingRelation) return;
-                      setDragInfo({
-                        tableId: table.id,
-                        offsetX,
-                        offsetY
-                      });
-                      setSelectedTable(table.id);
-                      e.preventDefault();
-                    }}
-                    onDeleteTable={() => deleteTable(table.id)}
-                    onUpdateField={(fieldId, updates) => {
-                      setTables(tables.map(t => {
-                        if (t.id === table.id) {
-                          return {
-                            ...t,
-                            fields: t.fields.map(f => {
-                              if (f.id === fieldId) {
-                                return { ...f, ...updates };
-                              }
-                              return f;
-                            })
-                          };
-                        }
-                        return t;
-                      }));
-                    }}
-                    onDeleteField={(fieldId) => deleteField(table.id, fieldId)}
-                    onAddField={() => addField(table.id)}
-                    onStartRelation={(fieldId) => startRelation(table.id, fieldId)}
-                    onCompleteRelation={(fieldId) => completeRelation(table.id, fieldId)}
-                  />
-                ))}
-              </>
-            )}
-          </div>
-        )}
-        
-        {/* ER Diagram View */}
-        {showERDiagram && (
-          <div className="er-diagram-view">
-            {tables.length === 0 ? (
-              <div className="er-diagram-placeholder">
-                <p>No tables to display in ER Diagram</p>
-                <p>Add some tables to visualize your database structure</p>
-              </div>
-            ) : (
+              ))}
+            </div>
+          ) : (
+            // ER Diagram View (full width when active)
+            <div className="er-diagram-view full-width">
               <EntityRelationshipDiagram 
                 tables={tables} 
                 relations={relations} 
               />
-            )}
+            </div>
+          )}
+        </div>
+      );
+    };
+    
+    return (
+      <div className="page database-designer-page">
+        <h1>Database Designer</h1>
+        <div className="designer-container">
+          <div className="sidebar">
+            <DesignerToolbar 
+              onAddTable={createTable}
+              onExportSQL={exportSQL}
+              onCreateExample={createExampleSchema}
+              onToggleView={toggleView}
+              isCreatingRelation={!!creatingRelation}
+              showERDiagram={showERDiagram}
+            />
+            
+            <PropertiesPanel 
+              selectedTable={selectedTable}
+              tables={tables} 
+              onUpdateTable={(updatedTable) => {
+                setTables(tables.map(t => t.id === updatedTable.id ? updatedTable : t));
+              }}
+              onDeleteTable={deleteTable}
+              onAddField={addField}
+            />
           </div>
-        )}
+          
+          {renderMainContent()}
+    
+          {/* Modal Components */}
+          {editModalVisible && modalTableId && (
+            <EditTableModal 
+              table={tables.find(t => t.id === modalTableId)}
+              tables={tables}
+              relations={relations}
+              dataTypes={DATA_TYPES}
+              onClose={() => setEditModalVisible(false)}
+              onSave={saveTableChanges}
+            />
+          )}
+    
+          {viewModalVisible && modalTableId && (
+            <ViewDataModal 
+              table={tables.find(t => t.id === modalTableId)}
+              tableData={tableData[modalTableId] || []}
+              onClose={() => setViewModalVisible(false)}
+              onSaveData={(data) => saveTableData(modalTableId, data)}
+            />
+          )}
+        </div>
       </div>
     );
   };
-
-  return (
-    <div className="page database-designer-page">
-      <h1>Database Designer</h1>
-      <div className="designer-container">
-        <div className="sidebar">
-          <DesignerToolbar 
-            onAddTable={createTable}
-            onToggleRelation={() => setCreatingRelation(creatingRelation ? null : {})}
-            onExportSQL={exportSQL}
-            onCreateExample={createExampleSchema}
-            onToggleERDiagram={toggleERDiagram}
-            onToggleCanvas={toggleCanvas}
-            isCreatingRelation={!!creatingRelation}
-            showERDiagram={showERDiagram}
-            showCanvas={showCanvas}
-          />
-          
-          <PropertiesPanel 
-            selectedTable={selectedTable}
-            tables={tables} 
-            onUpdateTable={(updatedTable) => {
-              setTables(tables.map(t => t.id === updatedTable.id ? updatedTable : t));
-            }}
-            onDeleteTable={deleteTable}
-            onAddField={addField}
-          />
-        </div>
-        
-        {renderMainContent()}
-      </div>
-    </div>
-  );
-};
-
-export default DatabaseDesigner;
+  
+  export default DatabaseDesigner;
