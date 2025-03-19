@@ -1,0 +1,136 @@
+.er-diagram-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 300px;
+    height: 100%;
+    background-color: white;
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    z-index: 100;
+    transition: transform 0.3s ease;
+  }
+  
+  .er-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: var(--secondary-color);
+    color: white;
+  }
+  
+  .er-panel-header h3 {
+    margin: 0;
+    font-size: 1rem;
+  }
+  
+  .close-panel-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+  }
+  
+  .close-panel-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .er-diagram-container {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .er-table-card {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  
+  .er-table-header {
+    background-color: #f5f5f5;
+    padding: 8px 10px;
+    border-bottom: 1px solid #ddd;
+    font-size: 0.9rem;
+  }
+  
+  .er-table-fields {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .er-table-field {
+    padding: 6px 10px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.85rem;
+  }
+  
+  .er-table-field:last-child {
+    border-bottom: none;
+  }
+  
+  .er-table-field.primary-key {
+    background-color: rgba(52, 152, 219, 0.05);
+  }
+  
+  .er-table-field.has-relation {
+    background-color: rgba(46, 204, 113, 0.05);
+  }
+  
+  .field-name-type {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .er-key-icon {
+    font-size: 0.75rem;
+    color: #e74c3c;
+  }
+  
+  .er-field-name {
+    font-weight: 500;
+  }
+  
+  .er-field-type {
+    color: #777;
+    font-size: 0.75rem;
+    margin-left: auto;
+  }
+  
+  .field-relations {
+    margin-top: 3px;
+    padding-left: 15px;
+    border-left: 2px solid #ddd;
+    margin-left: 5px;
+    font-size: 0.75rem;
+    color: #555;
+  }
+  
+  .relation-info {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 2px;
+  }
+  
+  .relation-arrow {
+    color: var(--primary-color);
+  }
+  
+  .related-table {
+    font-weight: 500;
+  }
+  
+  .related-field {
+    color: #777;
+  }

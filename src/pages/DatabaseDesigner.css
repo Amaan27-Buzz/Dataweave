@@ -1,0 +1,438 @@
+/* Database Designer Specific Styles */
+.schema-canvas {
+    position: relative;
+    background-color: #f9f9fa;
+    background-image: 
+      linear-gradient(rgba(100, 100, 100, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(100, 100, 100, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+    overflow: auto;
+  }
+  
+  /* Tools Panel */
+  .tools-panel ul li {
+    display: flex;
+    align-items: center;
+    padding: 8px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .tools-panel ul li:hover {
+    background-color: rgba(52, 152, 219, 0.1);
+  }
+  
+  .tool-icon {
+    margin-right: 8px;
+  }
+  
+  .active-tool {
+    color: var(--primary-color);
+    font-size: 0.85em;
+    font-weight: 500;
+  }
+  
+  /* Tables */
+  .db-table {
+    position: absolute;
+    background-color: white;
+    width: 220px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    user-select: none;
+    cursor: move;
+    z-index: 10;
+  }
+  
+  .db-table.selected {
+    box-shadow: 0 0 0 2px var(--primary-color), 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+  
+  .table-header {
+    background-color: var(--secondary-color);
+    color: white;
+    padding: 10px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .table-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  
+  .table-delete-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    padding: 0;
+  }
+  
+  .table-delete-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .table-body {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  .table-field {
+    padding: 6px 10px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .field-content {
+    display: grid;
+    grid-template-columns: 24px 1fr 1fr auto;
+    gap: 5px;
+    align-items: center;
+  }
+  
+  .field-icons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .pk-icon {
+    font-size: 12px;
+    color: #e74c3c;
+  }
+  
+  .field-name, .field-type {
+    font-size: 0.85rem;
+    padding: 4px;
+    border: 1px solid #eee;
+    border-radius: 3px;
+  }
+  
+  .field-name:focus, .field-type:focus {
+    border-color: var(--primary-color);
+    outline: none;
+  }
+  
+  .field-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  .field-relation-btn, .field-delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+    font-size: 14px;
+    padding: 0;
+  }
+  
+  .field-relation-btn:hover, .field-delete-btn:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .field-delete-btn {
+    color: #e74c3c;
+  }
+  
+  .field-attributes {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+    padding-left: 24px;
+  }
+  
+  .field-attributes label {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.75rem;
+    color: #666;
+    cursor: pointer;
+  }
+  
+  .table-footer {
+    padding: 8px 10px;
+    background-color: #f9f9f9;
+    border-top: 1px solid #eee;
+  }
+  
+  .add-field-btn {
+    width: 100%;
+    background-color: white;
+    border: 1px dashed #ccc;
+    color: #666;
+    padding: 5px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .add-field-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+  
+  /* Relations */
+  .relations-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+  }
+  
+  .relation-line {
+    stroke: #666;
+    stroke-width: 1.5;
+    fill: none;
+  }
+  
+  .relation-end {
+    stroke: #666;
+    stroke-width: 1.5;
+  }
+  
+  .creating-relation {
+    stroke: var(--primary-color);
+    stroke-width: 1.5;
+    stroke-dasharray: 5, 5;
+  }
+  
+  /* Properties Panel */
+  .table-properties {
+    padding: 10px 0;
+  }
+  
+  .property-button {
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    width: 100%;
+    margin-top: 5px;
+    border: none;
+  }
+  
+  .add-button {
+    background-color: var(--primary-color);
+    color: white;
+  }
+  
+  .add-button:hover {
+    background-color: var(--hover-color);
+  }
+  
+  .delete-button {
+    background-color: #e74c3c;
+    color: white;
+  }
+  
+  .delete-button:hover {
+    background-color: #c0392b;
+  }
+  
+  /* Canvas Placeholder */
+  .canvas-placeholder {
+    text-align: center;
+    color: #777;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .canvas-placeholder p:first-child {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--secondary-color);
+    margin-bottom: 10px;
+  }
+
+  /* Add these styles to the existing CSS file */
+
+.relations-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+  }
+  
+  .relation-line {
+    stroke: #666;
+    stroke-width: 1.5;
+    fill: none;
+    transition: stroke 0.2s ease;
+  }
+  
+  .relation:hover .relation-line {
+    stroke: var(--primary-color);
+    stroke-width: 2.5;
+  }
+  
+  .relation-end {
+    stroke: #666;
+    stroke-width: 1.5;
+  }
+  
+  .relation:hover .relation-end {
+    stroke: var(--primary-color);
+    stroke-width: 2;
+  }
+  
+  .creating-relation {
+    stroke: var(--primary-color);
+    stroke-width: 1.5;
+    stroke-dasharray: 5, 5;
+    animation: dash 1s linear infinite;
+  }
+  
+  @keyframes dash {
+    to {
+      stroke-dashoffset: -10;
+    }
+  }
+  
+  .disabled-tool {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .field-relation-btn.active {
+    background-color: var(--primary-color);
+    color: white;
+  }
+
+  /* Add these styles to your existing DatabaseDesigner.css file */
+
+.schema-canvas {
+    position: relative;
+    transition: margin-right 0.3s ease;
+  }
+  
+  .schema-canvas.with-er-diagram {
+    margin-right: 300px; /* Same as the width of the ER diagram panel */
+  }
+  
+  /* Match existing relationship styles */
+  .er-table-field.has-relation {
+    position: relative;
+  }
+  
+  .er-table-field.has-relation::after {
+    content: '';
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    transform: translateY(-50%);
+  }
+
+  /* Add this to your existing DatabaseDesigner.css */
+
+.designer-container {
+    display: flex;
+    height: calc(100vh - 120px);
+    margin-top: 20px;
+  }
+  
+  .sidebar {
+    width: 250px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #ddd;
+  }
+  
+  .main-content {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+  }
+  
+  .canvas {
+    position: relative;
+    flex: 1;
+    background-color: #f9f9f9;
+    overflow: auto;
+    min-height: 100%;
+  }
+  
+  .er-diagram-view {
+    width: 50%;
+    min-width: 400px;
+    border-left: 1px solid #ddd;
+    overflow: hidden;
+  }
+  
+  /* When only canvas or ER diagram is shown, they take full width */
+  .main-content:only-child .canvas,
+  .main-content:only-child .er-diagram-view {
+    width: 100%;
+  }
+  
+  .canvas-placeholder,
+  .er-diagram-placeholder,
+  .no-view-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    color: #777;
+    font-size: 1.2rem;
+    padding: 20px;
+  }
+  
+  .no-view-message h2 {
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  .view-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+  }
+  
+  .view-buttons button {
+    padding: 10px 20px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s;
+  }
+  
+  .view-buttons button:hover {
+    background-color: var(--primary-hover);
+  }

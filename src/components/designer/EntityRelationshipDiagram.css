@@ -1,0 +1,132 @@
+.er-diagram-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: white;
+    overflow: hidden;
+  }
+  
+  .er-diagram-title {
+    padding: 10px 15px;
+    margin: 0;
+    background-color: var(--secondary-color);
+    color: white;
+    font-size: 1rem;
+    font-weight: 500;
+  }
+  
+  .er-diagram-canvas-container {
+    flex: 1;
+    overflow: auto;
+    position: relative;
+  }
+  
+  .er-diagram-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    min-width: 100%;
+    min-height: 100%;
+    background-color: #fafafa;
+  }
+  
+  .er-diagram-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 10px 15px;
+    background-color: #f5f5f5;
+    border-top: 1px solid #ddd;
+  }
+  
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+  }
+  
+  .legend-symbol {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .entity-rectangle {
+    width: 20px;
+    height: 15px;
+    background-color: #f5f5f5;
+    border: 2px solid #333;
+  }
+  
+  .relationship-diamond {
+    width: 0;
+    height: 0;
+    border: 8px solid transparent;
+    border-bottom-color: #3498db;
+    position: relative;
+    top: -8px;
+  }
+  
+  .relationship-diamond:after {
+    content: '';
+    position: absolute;
+    left: -8px;
+    top: 8px;
+    width: 0;
+    height: 0;
+    border: 8px solid transparent;
+    border-top-color: #3498db;
+  }
+  
+  .primary-key-circle {
+    width: 12px;
+    height: 12px;
+    background-color: #e74c3c;
+    border-radius: 50%;
+  }
+  
+  .crows-foot {
+    position: relative;
+    width: 20px;
+    height: 2px;
+    background-color: #666;
+  }
+  
+  .crows-foot:before, .crows-foot:after {
+    content: '';
+    position: absolute;
+    right: 0;
+    height: 6px;
+    width: 2px;
+    background-color: #666;
+  }
+  
+  .crows-foot:before {
+    transform: rotate(45deg);
+    top: -4px;
+  }
+  
+  .crows-foot:after {
+    transform: rotate(-45deg);
+    top: 0;
+  }
+  
+  .one-bar {
+    position: relative;
+    width: 10px;
+    height: 2px;
+    background-color: #666;
+  }
+  
+  .one-bar:before {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: -6px;
+    height: 14px;
+    width: 2px;
+    background-color: #666;
+  }

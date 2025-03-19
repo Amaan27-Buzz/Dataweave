@@ -1,0 +1,29 @@
+DataWeave/
+├── public/
+│   ├── index.html                  # HTML template for the app
+│   └── favicon.ico                 # Favicon for the app
+├── src/
+│   ├── assets/                     # Static assets like images, icons
+│   ├── components/                 # Reusable React components
+│   │   ├── designer/               # Components specific to the schema designer
+│   │   │   ├── Table.jsx           # Component for rendering a table
+│   │   │   ├── DesignerToolbar.jsx # Toolbar for schema designer actions
+│   │   │   ├── PropertiesPanel.jsx # Panel for table properties
+│   │   │   ├── ERDiagramPanel.jsx  # Panel for displaying ER diagram
+│   │   │   ├── EntityRelationshipDiagram.jsx # Component for rendering ER diagrams
+│   │   │   ├── RelationUtils.jsx   # Utility functions for handling relationships
+│   │   │   ├── SQLUtils.jsx        # Utility functions for generating SQL
+│   │   │   └── constants.js        # Constants used in the schema designer
+│   ├── pages/                      # Page-level components
+│   │   ├── DatabaseDesigner.jsx    # Main page component for the database designer
+│   ├── styles/                     # Global and component-specific styles
+│   │   ├── Pages.css               # Styles for page-level components
+│   │   ├── DatabaseDesigner.css    # Styles for the database designer page
+│   │   ├── ERDiagramPanel.css      # Styles for the ER diagram panel
+│   │   ├── EntityRelationshipDiagram.css # Styles for the ER diagram component
+│   ├── App.jsx                     # Main app component
+│   ├── index.jsx                   # Entry point for the React app
+│   └── main.jsx                    # Main entry file for Vite
+├── .gitignore                      # Git ignore file
+├── package.json                    # NPM package configuration
+└── README.md                       # Project documentation
